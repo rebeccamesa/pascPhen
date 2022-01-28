@@ -1,0 +1,23 @@
+Package: pascPhen
+Title: Analysis of Post-Acute Sequelae of SARS-CoV-2 infection (PASC) rule-based phenotypes
+Version: 0.0.0.9000
+Authors@R: c(
+    person("Rebecca", "Mesa", , "rebi.mesa@gmail.com", role = c("aut", "cre"))
+  )
+Description: What the package does (one paragraph).
+License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
+    license
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+Imports: 
+    data.table,
+    dplyr,
+    forcats,
+    ggplot2,
+    ggridges,
+    mlho,
+    stats
+Depends: 
+    R (>= 2.10)
+LazyData: true
