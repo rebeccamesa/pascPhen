@@ -1,0 +1,76 @@
+---
+title: "MLHO for PASC Phenotyping"
+author: "Rebecca Mesa"
+date: "28/1/2022"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{MLHO for PASC Phenotyping}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  echo = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, include=FALSE}
+#devtools::install_github("rebeccamesa/pascPhen")
+#devtools::install_github("hestiri/mlho")
+library(pascPhen)
+library(mlho)
+
+if(!require(pacman)) install.packages("pacman")
+
+pacman::p_load(data.table, devtools, backports, Hmisc, tidyr,dplyr,ggplot2,plyr,scales,readr,Rmisc,
+               httr, DT, lubridate, tidyverse,reshape2,foreach,doParallel,caret,gbm,lubridate,praznik,
+               readxl, ggridges, forcats, stats)
+```
+
+## Read data
+
+```{r}
+PatientObservations <- read.csv(file.choose())
+PatientSummary<- read.csv(file.choose())
+data("rules")
+```
+
+## Inspect the distribution of the phenotypes
+
+```{r,fig.align='center',fig.width=8,fig.height=6}
+phen_distribution(PatientObservations, PatientSummary, rules)
+```
+
+## Inspect the distribution of the phenotypes grouped by sex
+
+```{r,fig.align='center',fig.width=8,fig.height=6}
+phen_distribution(PatientObservations, PatientSummary, rules, stratified_by = "sex")
+```
+
+## Choose a phenotype and a window for the long stage 
+
+```{r}
+days <- 15
+phen <- "Neurological Deficits"
+```
+
+## Apply MLHO for PheWAS
+### Phenotyping: we will find the features that can help re-defining the phenotype 
+
+```{r}
+phenotyping.output <- mlho_features(PatientObservations, PatientSummary, rules, days.long=days, phenotype=phen, MSMR.topn=50, classifier="GLM")
+datatable(phenotyping.output, options = list(pageLength = 5), filter = 'bottom')
+```
+For the phenotyping task we found `r nrow(subset(phenotyping.output,phenotyping.output$P <= 0.05))` features.
+
+### Prediction: we will find the features that can be predictive for the phenotype
+
+```{r}
+prediction.output <- mlho_features(PatientObservations, PatientSummary, rules, days.long=days, phenotype=phen, MSMR.topn=50, classifier="GLM", prediction = TRUE)
+datatable(prediction.output, options = list(pageLength = 5), filter = 'bottom')
+```
+For the prediction task we found `r nrow(subset(prediction.output,prediction.output$P <= 0.05))` features.
+
