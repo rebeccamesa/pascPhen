@@ -4,7 +4,9 @@ Version: 0.0.0.9000
 Authors@R: c(
     person("Rebecca", "Mesa", , "rebi.mesa@gmail.com", role = c("aut", "cre"))
   )
-Description: What the package does (one paragraph).
+Description: This package provides functions for the description of the phenotype distribution 
+	and the application of MLHO framework with the aim of extracting features that can
+	contribute to the definition of the phenotype itseslf.
 License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
     license
 Encoding: UTF-8
@@ -21,3 +23,4 @@ Imports:
 Depends: 
     R (>= 2.10)
 LazyData: true
+URL: https://github.com/rebeccamesa/pascPhen
