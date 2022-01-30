@@ -51,11 +51,17 @@ phen_distribution <- function(PatientObservations,
 
   # Ridgeline plot
 
-  pl1<-ggplot2::ggplot(Phen.data.tot, aes(y = forcats::fct_rev(forcats::fct_infreq(phenotype)), x = as.numeric(days_since_admission), fill = phenotype)) +
-    ggridges::geom_density_ridges(scale = 3, rel_min_height = 0.01, alpha = 0.9) +
-    ggplot2::theme_minimal() +
-    ggplot2::theme(legend.position = "none") +
+  pl1<-ggplot2::ggplot(Phen.data.tot, aes(y = forcats::fct_rev(forcats::fct_infreq(phenotype)), x = as.numeric(days_since_admission), fill = stat(x))) +
+    ggridges::geom_density_ridges_gradient(scale = 3, rel_min_height = 0.01, alpha = 0.9) +
+    ggplot2::theme_minimal()+
+    ggplot2::scale_fill_viridis_c(name = "Days since admission:",option = "G")+
     ggplot2::labs(x = "Days since admission", y = "", title = "Phenotype distribution")
+
+  if(!is.null(stratified_by)){
+    pl1<-pl1+
+      ggplot2::facet_wrap(~Phen.data.tot[,stratified_by])+
+      ggplot2::theme_grey()
+  }
 
   # Bar plot
 
@@ -66,7 +72,7 @@ phen_distribution <- function(PatientObservations,
       ggplot2::theme_minimal()+
       ggplot2::coord_flip()+
       ggplot2::scale_fill_brewer(name = "Stage:", labels = c("Long (90, )", "Post (30, 90]", "Acute (-14, 30]", "Pre ( ,-14]"))+
-      ggplot2::labs(y = "Counts", x = "", title = "Phenotype occurences")
+      ggplot2::labs(y = "Counts", x = "", title = "Phenotype occurences", )
   } else {
     pl2<-ggplot2::ggplot(Phen.data.tot, aes(y=Phen.data.tot[,stratified_by], fill = stage))+
         ggplot2::geom_bar()+

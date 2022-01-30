@@ -27,7 +27,7 @@ if(!require(pacman)) install.packages("pacman")
 
 pacman::p_load(data.table, devtools, backports, Hmisc, tidyr,dplyr,ggplot2,plyr,scales,readr,Rmisc,
                httr, DT, lubridate, tidyverse,reshape2,foreach,doParallel,caret,gbm,lubridate,praznik,
-               readxl, ggridges, forcats, stats)
+               ggridges, forcats, stats)
 ```
 
 ## Read data
@@ -40,13 +40,13 @@ data("rules")
 
 ## Inspect the distribution of the phenotypes
 
-```{r,fig.align='center',fig.width=8,fig.height=6}
+```{r,fig.align='center',fig.width=10,fig.height=6}
 phen_distribution(PatientObservations, PatientSummary, rules)
 ```
 
 ## Inspect the distribution of the phenotypes grouped by sex
 
-```{r,fig.align='center',fig.width=8,fig.height=6}
+```{r,fig.align='center',fig.width=10,fig.height=6}
 phen_distribution(PatientObservations, PatientSummary, rules, stratified_by = "sex")
 ```
 
