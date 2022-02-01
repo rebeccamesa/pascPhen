@@ -41,13 +41,29 @@ data("rules")
 ## Inspect the distribution of the phenotypes
 
 ```{r,fig.align='center',fig.width=10,fig.height=6}
-phen_distribution(PatientObservations, PatientSummary, rules)
+distribution.output<-phen_distribution(PatientObservations, PatientSummary, rules)
+tot.count<-distribution.output$tot.count
+
+datatable(tot.count, options = list(pageLength = 10))
+distribution.output$phen.barPlot
+distribution.output$phen.distributionPlot
+
 ```
 
-## Inspect the distribution of the phenotypes grouped by sex
+## Visualize the occurences of the phenotypes grouped by sex
 
 ```{r,fig.align='center',fig.width=10,fig.height=6}
-phen_distribution(PatientObservations, PatientSummary, rules, stratified_by = "sex")
+distribution.group.output<-phen_distribution(PatientObservations, PatientSummary, rules, stratified_by = "sex")
+
+distribution.group.output$phen.barPlot
+```
+
+## Visualize the occurences of the phenotypes grouped by age
+
+```{r,fig.align='center',fig.width=10,fig.height=12}
+distribution.group.output<-phen_distribution(PatientObservations, PatientSummary, rules, stratified_by = "age_group")
+
+distribution.group.output$phen.barPlot
 ```
 
 ## Choose a phenotype and a window for the long stage 
