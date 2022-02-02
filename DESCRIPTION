@@ -19,6 +19,7 @@ Imports:
     ggplot2,
     ggridges,
     mlho,
+    RColorBrewer,
     stats
 Depends: 
     R (>= 2.10)

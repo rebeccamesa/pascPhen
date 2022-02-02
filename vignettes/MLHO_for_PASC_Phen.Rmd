@@ -33,8 +33,8 @@ pacman::p_load(data.table, devtools, backports, Hmisc, tidyr,dplyr,ggplot2,plyr,
 ## Read data
 
 ```{r}
-PatientObservations <- read.csv(file.choose())
-PatientSummary<- read.csv(file.choose())
+PatientObservations <- read.csv(file.choose()) #load 2.1 PatientObservatios table
+PatientSummary<- read.csv(file.choose()) # load 2.1 PatientSummary table
 data("rules")
 ```
 
@@ -50,7 +50,7 @@ distribution.output$phen.distributionPlot
 
 ```
 
-## Visualize the occurences of the phenotypes grouped by sex
+## Visualize the barplot of the phenotypes grouped by sex
 
 ```{r,fig.align='center',fig.width=10,fig.height=6}
 distribution.group.output<-phen_distribution(PatientObservations, PatientSummary, rules, stratified_by = "sex")
@@ -58,7 +58,7 @@ distribution.group.output<-phen_distribution(PatientObservations, PatientSummary
 distribution.group.output$phen.barPlot
 ```
 
-## Visualize the occurences of the phenotypes grouped by age
+## Visualize the barplot of the phenotypes grouped by age
 
 ```{r,fig.align='center',fig.width=10,fig.height=12}
 distribution.group.output<-phen_distribution(PatientObservations, PatientSummary, rules, stratified_by = "age_group")

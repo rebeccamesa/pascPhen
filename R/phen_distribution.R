@@ -69,14 +69,16 @@ phen_distribution <- function(PatientObservations,
       ggplot2::scale_fill_brewer(name = "Stage:", labels = c("day90plus", "day30to89", "day0to29", "dayN14toN1", "before_adm"))+
       ggplot2::labs(y = "Counts", x = "", title = "Phenotype occurences", )
   } else {
-    pl2<-ggplot2::ggplot(Phen.data.tot, aes(y=Phen.data.tot[,stratified_by], fill = stage, col=sex))+
-        ggplot2::geom_bar()+
-        ggplot2::facet_grid(phenotype~ ., switch = "y")+
-        ggplot2::theme_minimal()+
-        ggplot2::scale_y_discrete(position = "right")+
-        ggplot2::scale_fill_brewer(name = "Stage:", labels = c("day90plus", "day30to89", "day0to29", "dayN14toN1", "before_adm"))+
-        ggplot2::theme(strip.text.y.left = ggplot2::element_text(angle = 0))+
-        ggplot2::labs(y = "", x = "Counts", title = paste("Phenotype occurences stratified by",stratified_by))
+    pl2<-ggplot(Phen.data.tot) +
+      geom_bar(aes(y = Phen.data.tot[,stratified_by], fill = Phen.data.tot[,stratified_by], alpha = stage)) +
+      facet_grid(phenotype~., switch = "y") +
+      ggplot2::theme_minimal()+
+      ggplot2::scale_y_discrete(position = "right")+
+      #scale_fill_manual(values = c("#ff7514","#008f39"), guide = "none")+
+      scale_fill_manual(values = RColorBrewer::brewer.pal(name="Set1", n=length(unique(Phen.data.tot[,stratified_by]))), guide="none")+
+      scale_alpha_manual(values=c(0.2, 0.4, 0.6, 0.8, 1), name = "Stage", labels= c("day90plus", "day30to89", "day0to29", "dayN14toN1", "before_adm"))+
+      ggplot2::theme(strip.text.y.left = ggplot2::element_text(angle = 0))+
+      ggplot2::labs(y = "", x = "Counts", title = paste("Phenotype occurences stratified by",stratified_by))
 
   }
 
