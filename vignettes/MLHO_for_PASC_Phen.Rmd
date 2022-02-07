@@ -1,12 +1,8 @@
 ---
 title: "MLHO for PASC Phenotyping"
 author: "Rebecca Mesa"
-date: "28/1/2022"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{MLHO for PASC Phenotyping}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+date: "7/2/2022"
+output: html_document
 ---
 
 ```{r, include = FALSE}
@@ -17,7 +13,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup, include=FALSE}
+```{r, include=FALSE}
 #devtools::install_github("rebeccamesa/pascPhen")
 #devtools::install_github("hestiri/mlho")
 library(pascPhen)
@@ -27,66 +23,25 @@ if(!require(pacman)) install.packages("pacman")
 
 pacman::p_load(data.table, devtools, backports, Hmisc, tidyr,dplyr,ggplot2,plyr,scales,readr,Rmisc,
                httr, DT, lubridate, tidyverse,reshape2,foreach,doParallel,caret,gbm,lubridate,praznik,
-               ggridges, forcats, stats)
+               ggridges, forcats, stats, FourCePhase2.1Data)
 ```
 
-## Read data
-
-```{r}
-PatientObservations <- read.csv(file.choose()) #load 2.1 PatientObservatios table
-PatientSummary<- read.csv(file.choose()) # load 2.1 PatientSummary table
-data("rules")
-```
-
-## Inspect the distribution of the phenotypes
-
-```{r,fig.align='center',fig.width=10,fig.height=6}
-distribution.output<-phen_distribution(PatientObservations, PatientSummary, rules)
-tot.count<-distribution.output$tot.count
-
-datatable(tot.count, options = list(pageLength = 10))
-distribution.output$phen.barPlot
-distribution.output$phen.distributionPlot
-
-```
-
-## Visualize the barplot of the phenotypes grouped by sex
-
-```{r,fig.align='center',fig.width=10,fig.height=6}
-distribution.group.output<-phen_distribution(PatientObservations, PatientSummary, rules, stratified_by = "sex")
-
-distribution.group.output$phen.barPlot
-```
-
-## Visualize the barplot of the phenotypes grouped by age
+# Phenotype distribution
 
 ```{r,fig.align='center',fig.width=10,fig.height=12}
-distribution.group.output<-phen_distribution(PatientObservations, PatientSummary, rules, stratified_by = "age_group")
-
-distribution.group.output$phen.barPlot
+runAnalysis_distribution("C:/Users/rebim/Desktop/Tesi/PASC Analysis/Dati ICSM 4CE", "icsm")
 ```
 
-## Choose a phenotype and a window for the long stage 
+# Choose the phenotype of interest and the long stage window
 
 ```{r}
 days <- 15
 phen <- "Neurological Deficits"
 ```
 
-## Apply MLHO for PheWAS
-### Phenotyping: we will find the features that can help re-defining the phenotype 
+# Apply MLHO to find features (prediction and phenotyping)
 
 ```{r}
-phenotyping.output <- mlho_features(PatientObservations, PatientSummary, rules, days.long=days, phenotype=phen, MSMR.topn=50, classifier="GLM")
-datatable(phenotyping.output, options = list(pageLength = 5), filter = 'bottom')
+runAnalysis_MLHO("C:/Users/rebim/Desktop/Tesi/PASC Analysis/Dati ICSM 4CE", "icsm", days, phen)
 ```
-For the phenotyping task we found `r nrow(subset(phenotyping.output,phenotyping.output$P <= 0.05))` features.
-
-### Prediction: we will find the features that can be predictive for the phenotype
-
-```{r}
-prediction.output <- mlho_features(PatientObservations, PatientSummary, rules, days.long=days, phenotype=phen, MSMR.topn=50, classifier="GLM", prediction = TRUE)
-datatable(prediction.output, options = list(pageLength = 5), filter = 'bottom')
-```
-For the prediction task we found `r nrow(subset(prediction.output,prediction.output$P <= 0.05))` features.
 

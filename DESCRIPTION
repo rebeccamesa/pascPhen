@@ -16,6 +16,7 @@ Imports:
     data.table,
     dplyr,
     forcats,
+    FourCePhase2.1Data,
     ggplot2,
     ggridges,
     mlho,
