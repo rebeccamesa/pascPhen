@@ -8,6 +8,7 @@ phen_distribution(
   PatientObservations,
   PatientSummary,
   rules,
+  siteid,
   stratified_by = NULL
 )
 }
@@ -18,12 +19,14 @@ phen_distribution(
 
 \item{rules}{table containing the phenotype definitions}
 
+\item{siteid}{label specifying the site}
+
 \item{stratified_by}{label for the stratification of the bar plot}
 }
 \value{
-two plots
+four plots and count table
 }
 \description{
-Build a ridgeline plot and a box plot of the distribution of the phenotypes
+Build ridgeline plots and box plots of the distribution of the phenotypes
 over the dataset
 }

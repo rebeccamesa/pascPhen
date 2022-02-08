@@ -3,8 +3,8 @@
 #' @param data_dir directory of the 4CE tables
 #' @param output_dir directory of the analysis results. If NULL results are saved in the `getProjectOutputDirectory()` directory
 #' @param siteid label specifying the site
-#' @long.thres "long" stage threshold
-#' @phenotype phenotype of interest
+#' @param long.thres "long" stage threshold
+#' @param phenotype phenotype of interest
 #'
 #' @return NULL.
 #' @export
