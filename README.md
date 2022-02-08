@@ -3,20 +3,13 @@ pascPhen is a package for the analysis of Post-Acute Sequelae of SARS-CoV-2 infe
 It provides functions for the description of the phenotype distribution and the application of MLHO framework with the aim of extracting features that can contribute to the re-definition of the phenotype.
 
 ## Installation
-You can install the released version of pascPhen from [Github](https://github.com/rebeccamesa/pascPhen) with:
+You can install the package from [Github](https://github.com/rebeccamesa/pascPhen) with:
 
 `devtools::install_github("rebeccamesa/pascPhen")`
 
-## Data
-You need three datasets:
-* 2.1 *PatientObservations* table
-* 2.1 *PatientSummary* table
-* *rules* table with 4 columns:
+## Analysis
+2 main analysis are implemented:
+* distribution of the phenotypes
+* application of MLHO framework to a specific phenotype
 
-  PASC_Phenotype | Coding | Code | Description
-  :------------: | :----: | :--: | :---------:
-  character | character | character | character
-  
-  You can load the *rules* table from the package with:
-  
-  `utils::data(rules)`
+Please run the first analysis with `pascPhen::runAnalysis_distribution(data_dir, output_dir, siteid)`, where *data_dir* is the 4CE data directory, *output_dir* is the customized directory for the results and *siteid* is the label specifying the site. If *output_dir* is null, results are saved in the `getProjectOutputDirectory()`directory. 
