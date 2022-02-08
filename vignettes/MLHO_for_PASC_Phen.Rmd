@@ -14,8 +14,8 @@ knitr::opts_chunk$set(
 ```
 
 ```{r, include=FALSE}
-#devtools::install_github("rebeccamesa/pascPhen")
-#devtools::install_github("hestiri/mlho")
+#devtools::install_github("rebeccamesa/pascPhen") #check if installed
+#devtools::install_github("hestiri/mlho") #check if installed
 library(pascPhen)
 library(mlho)
 
@@ -29,19 +29,24 @@ pacman::p_load(data.table, devtools, backports, Hmisc, tidyr,dplyr,ggplot2,plyr,
 # Phenotype distribution
 
 ```{r,fig.align='center',fig.width=10,fig.height=12}
-runAnalysis_distribution("C:/Users/rebim/Desktop/Tesi/PASC Analysis/Dati ICSM 4CE", "icsm")
+# Set input data directory
+data_dir <- "C:/Users/rebim/Desktop/Tesi/PASC Analysis/Dati ICSM 4CE"
+# Set output results directory. If NULL results are saved in 'getProjectOutput' directory
+output_dir <- "C:/Users/rebim/Desktop/Tesi/PASC Analysis/Rule based Phenotyping/Output"
+
+runAnalysis_distribution (data_dir, output_dir, siteid = "icsm")
 ```
 
-# Choose the phenotype of interest and the long stage window
+<!-- # Choose the phenotype of interest and the long stage window -->
 
-```{r}
-days <- 15
-phen <- "Neurological Deficits"
-```
+<!-- ```{r} -->
+<!-- days <- 15 -->
+<!-- phen <- "Neurological Deficits" -->
+<!-- ``` -->
 
-# Apply MLHO to find features (prediction and phenotyping)
+<!-- # Apply MLHO to find features (prediction and phenotyping) -->
 
-```{r}
-runAnalysis_MLHO("C:/Users/rebim/Desktop/Tesi/PASC Analysis/Dati ICSM 4CE", "icsm", days, phen)
-```
+<!-- ```{r} -->
+<!-- runAnalysis_MLHO(data_dir, output_dir, siteid = "icsm", long.thres = days, phenotype = phen) -->
+<!-- ``` -->
 

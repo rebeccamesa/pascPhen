@@ -106,6 +106,12 @@ phen_distribution <- function(PatientObservations,
   pl1<-ridgeline.plot(Phen.data.tot,siteid,first = FALSE)
   pl2<-bar.plot(Phen.data.tot,stratified_by,siteid, first = FALSE)
 
+  Phen.data.tot$siteid <- rep(siteid,nrow(Phen.data.tot))
+  tot.count.strat <- NULL
+  if (!is.null(stratified_by)) {
+    tot.count.strat <- table(Phen.data.tot$phenotype, Phen.data.tot$stage, Phen.data.tot[,stratified_by], Phen.data.tot$siteid)
+  }
+
   # Use only the first time the phenotype appears -> Phen.data.first
   dOrder <- Phen.data.tot[order(Phen.data.tot$patient_num, Phen.data.tot$days_since_admission),]
   Phen.data.first <- dplyr::distinct(dOrder, patient_num, phenotype, .keep_all = TRUE)
@@ -119,9 +125,17 @@ phen_distribution <- function(PatientObservations,
   pl3<-ridgeline.plot(Phen.data.first,siteid,first = TRUE)
   pl4<-bar.plot(Phen.data.first,stratified_by,siteid, first = TRUE)
 
+  Phen.data.first$siteid <- rep(siteid, nrow(Phen.data.first))
+  first.count.strat<-NULL
+  if (!is.null(stratified_by)) {
+    first.count.strat<-table(Phen.data.first$phenotype, Phen.data.first$stage, Phen.data.first[,stratified_by], Phen.data.first$siteid)
+  }
+
   return(list(
     tot.count = tot.count,
+    tot.count.strat = tot.count.strat,
     first.count = first.count,
+    first.count.strat = first.count.strat,
     phen.distributionPlot = pl1,
     phen.barPlot = pl2,
     phen.1stDistributionPlot = pl3,
