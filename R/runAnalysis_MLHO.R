@@ -43,7 +43,7 @@ runAnalysis_MLHO <- function(data_dir, output_dir = NULL, siteid, long.thres, ph
   }
 
   perc.output <- phenotyping.output$perc.output
-  perc.output.blur <- blur_it(perc.output, "n.tot", "n", blur_abs, mask_thres)
+  perc.output.blur <- blur_it(perc.output, c("n.tot", "n"), blur_abs, mask_thres)
   perc.output.blur <- dplyr::mutate(perc.output.blur, perc = n/n.tot)
   perc.output$type <- rep("phenotyping", nrow(perc.output))
   perc.output$site <- rep(siteid, nrow(perc.output))
