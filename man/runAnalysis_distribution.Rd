@@ -14,7 +14,7 @@ runAnalysis_distribution(data_dir, output_dir = NULL, siteid)
 \item{siteid}{label specifying the site}
 }
 \value{
-NULL.
+phenotype data and count tables
 }
 \description{
 run distribution analysis

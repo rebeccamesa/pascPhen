@@ -9,7 +9,9 @@ output: html_document
 knitr::opts_chunk$set(
   collapse = TRUE,
   echo = TRUE,
-  comment = "#>"
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE
 )
 ```
 
@@ -26,27 +28,108 @@ pacman::p_load(data.table, devtools, backports, Hmisc, tidyr,dplyr,ggplot2,plyr,
                ggridges, forcats, stats, FourCePhase2.1Data)
 ```
 
-# Phenotype distribution
+# Set analysis parameters
 
-```{r,fig.align='center',fig.width=10,fig.height=12}
+```{r}
 # Set input data directory
 data_dir <- "C:/Users/rebim/Desktop/Tesi/PASC Analysis/Dati ICSM 4CE"
 # Set output results directory. If NULL results are saved in 'getProjectOutput' directory
 output_dir <- "C:/Users/rebim/Desktop/Tesi/PASC Analysis/Rule based Phenotyping/Output"
 
-runAnalysis_distribution (data_dir, output_dir, siteid = "icsm")
+siteid = "icsm"
+
 ```
 
-<!-- # Choose the phenotype of interest and the long stage window -->
+# Phenotype distribution
 
-<!-- ```{r} -->
-<!-- days <- 15 -->
-<!-- phen <- "Neurological Deficits" -->
-<!-- ``` -->
+```{r,fig.align='center',fig.width=10,fig.height=12}
+distribution.output <- runAnalysis_distribution (data_dir, output_dir, siteid = siteid)
+Phen.data.tot <-distribution.output$Phen.data.tot
+tot.count<-distribution.output$tot.count
+post.prev <-distribution.output$post.prev
 
-<!-- # Apply MLHO to find features (prediction and phenotyping) -->
 
-<!-- ```{r} -->
-<!-- runAnalysis_MLHO(data_dir, output_dir, siteid = "icsm", long.thres = days, phenotype = phen) -->
-<!-- ``` -->
+ggplot2::ggplot(Phen.data.tot, aes(y = forcats::fct_rev(phenotype), x = as.numeric(days_since_admission), fill = stat(x))) +
+  ggridges::geom_density_ridges_gradient(scale = 2, rel_min_height = 0.01, alpha = 0.8) +
+  ggplot2::theme_minimal()+
+  ggplot2::scale_fill_viridis_c(name = "Days since admission:",option = "G")+
+  ggplot2::labs(x = "Days since admission", y = "",
+                title = "Phenotype distribution",
+                subtitle = siteid)
+
+Phen.data.tot<-dplyr::mutate(Phen.data.tot, stage = 
+                               factor(stage, levels = c("day90plus", "day30to89", "day0to29", "dayN14toN1", "before_adm")))
+ggplot2::ggplot(Phen.data.tot, aes(forcats::fct_rev(phenotype), fill = stage))+
+  ggplot2::geom_bar()+
+  ggplot2::theme_minimal()+
+  ggplot2::coord_flip()+
+  ggplot2::scale_fill_brewer(name = "Stage:", labels = c("day90plus", "day30to89", "day0to29", "dayN14toN1", "before_adm"))+
+  ggplot2::labs(y = "Counts", x = "",
+                title = "Phenotype counts",
+                subtitle = siteid)
+
+bar_plot_strat <- function(data,stratified_by){
+  ggplot2::ggplot(data) +
+    geom_bar(aes(y = as.factor(data[,stratified_by]), fill = as.factor(data[,stratified_by]), alpha = stage)) +
+    facet_grid(phenotype~., switch = "y") +
+    ggplot2::theme_minimal()+
+    ggplot2::scale_y_discrete(position = "right")+
+    #scale_fill_manual(values = c("#ff7514","#008f39"), guide = "none")+
+    scale_fill_manual(values = RColorBrewer::brewer.pal(name="Set1", n=length(unique(data[,stratified_by]))), guide="none")+
+    scale_alpha_manual(values=c(0.2, 0.4, 0.6, 0.8, 1), name = "Stage", labels= 
+                         c("day90plus", "day30to89", "day0to29", "dayN14toN1", "before_adm"))+
+    ggplot2::theme(strip.text.y.left = ggplot2::element_text(angle = 0))+
+    ggplot2::labs(y = "", x = "Counts",
+                  title = paste("Phenotype counts stratified by", "\'",stratified_by, "\'"),
+                  subtitle = siteid)
+}
+
+bar_plot_strat(Phen.data.tot, "sex")
+bar_plot_strat(Phen.data.tot, "age_group")
+bar_plot_strat(Phen.data.tot, "severe")
+```
+
+# Choose the phenotype of interest and the long stage window
+
+```{r}
+days <- 15
+phen <- "Neurological Deficits"
+```
+
+# Apply MLHO to find features for the re-definition of the phenotype
+
+```{r}
+MLHO.output <- runAnalysis_MLHO(data_dir, output_dir, siteid = siteid, long.thres = days, phenotype = phen)
+
+MLHO.features <- MLHO.output$phenotyping.features
+
+ggplot2::ggplot(subset(MLHO.features, P<0.05)) +
+    geom_segment(
+      aes(y = 1,
+          x = reorder(features,OR),
+          yend = OR,
+          xend = features),
+      size=0.5,alpha=0.5) +
+    geom_point(
+      aes(x=reorder(features,OR),y=OR),
+      alpha=0.5,size=2,color="red") +
+    theme_minimal()+
+    scale_y_continuous(limits=c(0,10))+
+   coord_flip()+
+    labs(y="Odds Ratio",x="")
+```
+
+# Inspect features prevalence
+
+```{r, fig.align='center',fig.width=10,fig.height=6}
+perc.features <- MLHO.output$perc.output
+
+ggplot2::ggplot(perc.features, aes(y = phenx, x = perc, fill = as.factor(aoi)))+
+  ggplot2::geom_bar(stat = "identity")+
+  ggplot2::theme_minimal()+
+  ggplot2::labs(y = "", x = "Prevalence", 
+                fill = phen,
+                title = "Prevanlence of the output features" ,
+                subtitle = siteid)
+```
 

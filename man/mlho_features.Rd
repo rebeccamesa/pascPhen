@@ -51,7 +51,7 @@ mlho_features(
 \item{classifier}{mlearn parameter. Classification algorithm}
 }
 \value{
-table containing the extracted features with their ORs
+MLHO features and their prevalence
 }
 \description{
 Apply MLHO to extract features

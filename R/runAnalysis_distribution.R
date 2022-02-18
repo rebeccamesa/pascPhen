@@ -4,7 +4,7 @@
 #' @param output_dir directory of the analysis results. If NULL results are saved in the `getProjectOutputDirectory()` directory
 #' @param siteid label specifying the site
 #'
-#' @return NULL.
+#' @return phenotype data and count tables
 #' @export
 
 runAnalysis_distribution <- function(data_dir, output_dir=NULL, siteid){
@@ -48,69 +48,36 @@ runAnalysis_distribution <- function(data_dir, output_dir=NULL, siteid){
   }
 
   distribution.output <- phen_distribution(PatientObservations, PatientSummary, rules,siteid)
+  Phen.data.tot <- distribution.output$Phen.data.tot
   tot.count <- distribution.output$tot.count
-  tot.count <- blur_it(tot.count,c("before_adm","dayN14toN1","day0to29","day30to89","day90plus"), blur_abs, mask_thres)
-  print(tot.count)
-  tot.count1stOcc <- distribution.output$first.count
-  tot.count1stOcc <- blur_it(tot.count1stOcc,c("before_adm","dayN14toN1","day0to29","day30to89","day90plus"), blur_abs, mask_thres)
-  print(tot.count1stOcc)
-  phen.distributionPlot <- distribution.output$phen.distributionPlot
-  print(phen.distributionPlot)
-  phen1stOcc.distributionPlot <- distribution.output$phen.1stDistributionPlot
-  print(phen1stOcc.distributionPlot)
-  phen.barPlot <- distribution.output$phen.barPlot
-  print(phen.barPlot)
-  phen1stOcc.barPlot <- distribution.output$phen.1stBarPlot
-  print(phen1stOcc.barPlot)
+  tot.count.blur <- blur_it(tot.count,c("before_adm","dayN14toN1","day0to29","day30to89","day90plus"), blur_abs, mask_thres)
+  post.prev <- distribution.output$post.prev
+  post.prev.blur <- blur_it(post.prev, "n", blur_abs, mask_thres)
+  post.prev.blur <- post.prev.blur%>%dplyr::mutate(perc = n/n.tot)
 
-  distribution.output.sex <- phen_distribution(PatientObservations, PatientSummary, rules, siteid, stratified_by = "sex")
-  tot.count.sex <- distribution.output.sex$tot.count.strat
-  tot.count.sex <- blur_it_matrix(tot.count.sex, blur_abs,mask_thres)
-  tot.count1stOcc.sex <- distribution.output.sex$first.count.strat
-  tot.count1stOcc.sex <- blur_it_matrix(tot.count1stOcc.sex, blur_abs,mask_thres)
-  phen.barPlot.sex <- distribution.output.sex$phen.barPlot
-  print(phen.barPlot.sex)
-  phen1stOcc.barPlot.sex <- distribution.output.sex$phen.1stBarPlot
-  print(phen1stOcc.barPlot.sex)
-
-  distribution.output.age<-phen_distribution(PatientObservations, PatientSummary, rules, siteid, stratified_by = "age_group")
-  tot.count.age <- distribution.output.age$tot.count.strat
-  tot.count.age <- blur_it_matrix(tot.count.age, blur_abs,mask_thres)
-  tot.count1stOcc.age <- distribution.output.age$first.count.strat
-  tot.count1stOcc.age <- blur_it_matrix(tot.count1stOcc.age, blur_abs,mask_thres)
-  phen.barPlot.age <- distribution.output.age$phen.barPlot
-  print(phen.barPlot.age)
-  phen1stOcc.barPlot.age <- distribution.output.age$phen.1stBarPlot
-  print(phen1stOcc.barPlot.age)
-
-  distribution.output.severity<-phen_distribution(PatientObservations, PatientSummary, rules, siteid, stratified_by = "severe")
-  tot.count.severity <- distribution.output.severity$tot.count.strat
-  tot.count.severity <- blur_it_matrix(tot.count.severity, blur_abs,mask_thres)
-  tot.count1stOcc.severity <- distribution.output.severity$first.count.strat
-  tot.count1stOcc.severity <- blur_it_matrix(tot.count1stOcc.severity, blur_abs,mask_thres)
-  phen.barPlot.severity <- distribution.output.severity$phen.barPlot
-  print(phen.barPlot.severity)
-  phen1stOcc.barPlot.severity <- distribution.output.severity$phen.1stBarPlot
-  print(phen1stOcc.barPlot.severity)
-
-  distribution.output.race<-phen_distribution(PatientObservations, PatientSummary, rules, siteid, stratified_by = "race")
-  tot.count.race <- distribution.output.race$tot.count.strat
-  tot.count.race <- blur_it_matrix(tot.count.race, blur_abs,mask_thres)
-  tot.count1stOcc.race <- distribution.output.race$first.count.strat
-  tot.count1stOcc.race <- blur_it_matrix(tot.count1stOcc.race, blur_abs,mask_thres)
-  phen.barPlot.race <- distribution.output.race$phen.barPlot
-  print(phen.barPlot.race)
-  phen1stOcc.barPlot.race <- distribution.output.race$phen.1stBarPlot
-  print(phen1stOcc.barPlot.race)
+  Phen.data.tot$siteid <- rep(siteid, nrow(Phen.data.tot))
+  tot.count.sex<-table(Phen.data.tot$phenotype, Phen.data.tot$stage, Phen.data.tot$sex, Phen.data.tot$siteid)
+  tot.count.sex.blur <- blur_it_matrix(tot.count.sex, blur_abs,mask_thres)
+  tot.count.age<-table(Phen.data.tot$phenotype, Phen.data.tot$stage, Phen.data.tot$age_group, Phen.data.tot$siteid)
+  tot.count.age.blur <- blur_it_matrix(tot.count.age, blur_abs,mask_thres)
+  tot.count.severity<-table(Phen.data.tot$phenotype, Phen.data.tot$stage, Phen.data.tot$severe, Phen.data.tot$siteid)
+  tot.count.severity.blur <- blur_it_matrix(tot.count.severity, blur_abs,mask_thres)
+  # tot.count.race<-table(Phen.data.tot$phenotype, Phen.data.tot$stage, Phen.data.tot$race, Phen.data.tot$siteid)
+  # tot.count.race <- blur_it_matrix(tot.count.race, blur_abs,mask_thres)
 
   if (is.null(output_dir)) {
     output_dir <- getProjectOutputDirectory()
   }
 
-  save(tot.count,tot.count1stOcc,tot.count.sex, tot.count1stOcc.sex, tot.count.age, tot.count1stOcc.age,
-       tot.count.race,tot.count1stOcc.race,tot.count.severity, tot.count1stOcc.severity,
-       phen.distributionPlot,phen1stOcc.distributionPlot,phen.barPlot,phen1stOcc.barPlot,
-       phen.barPlot.sex,phen1stOcc.barPlot.sex,phen.barPlot.age,phen1stOcc.barPlot.age,
-       phen.barPlot.severity,phen1stOcc.barPlot.severity,phen.barPlot.race,phen1stOcc.barPlot.race,
+  save(tot.count.blur,post.prev.blur,tot.count.sex.blur, tot.count.age.blur,tot.count.severity.blur,
        file = paste(paste(output_dir,"/",sep=""),paste(siteid,"results_PhenDistribution.RData",sep="_"),sep=""))
+
+  return(list(
+    Phen.data.tot = Phen.data.tot,
+    tot.count = tot.count,
+    tot.count.sex = tot.count.sex,
+    tot.count.severity = tot.count.severity,
+    tot.count.age = tot.count.age,
+    post.prev = post.prev
+  ))
 }

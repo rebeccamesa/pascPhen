@@ -4,13 +4,7 @@
 \alias{phen_distribution}
 \title{Phenotype distribution}
 \usage{
-phen_distribution(
-  PatientObservations,
-  PatientSummary,
-  rules,
-  siteid,
-  stratified_by = NULL
-)
+phen_distribution(PatientObservations, PatientSummary, rules, siteid)
 }
 \arguments{
 \item{PatientObservations}{2.1 PatientObservations table}
@@ -20,13 +14,10 @@ phen_distribution(
 \item{rules}{table containing the phenotype definitions}
 
 \item{siteid}{label specifying the site}
-
-\item{stratified_by}{label for the stratification of the bar plot}
 }
 \value{
-four plots and count table
+count tables
 }
 \description{
-Build ridgeline plots and box plots of the distribution of the phenotypes
-over the dataset
+Phenotype distribution
 }

@@ -17,7 +17,7 @@
 #' @param score.threshold MLHO score threshold
 #' @param classifier mlearn parameter. Classification algorithm
 #'
-#' @return table containing the extracted features with their ORs
+#' @return MLHO features and their prevalence
 #' @export
 
 mlho_features <- function(PatientObservations,
@@ -62,6 +62,13 @@ mlho_features <- function(PatientObservations,
   }
   dbmart <- dplyr::mutate(dbmart[,c('patient_num', 'phenx')], DESCRIPTION = phenx)
 
+  pts.phen <- labeldt%>%dplyr::filter(label == 1)
+  pts.phen <- pts.phen$patient_num
+  pts.nophen <- unique(dbmart%>%dplyr::filter(!(patient_num %in% pts.phen))%>%dplyr::select(patient_num))
+  obs.phen <- dbmart%>%dplyr::filter(patient_num %in% pts.phen)%>%dplyr::mutate(aoi = 1, n.tot = length(pts.phen))
+  obs.nophen <- dbmart%>%dplyr::filter(!(patient_num %in% pts.phen))%>%dplyr::mutate(aoi = 0, n.tot = nrow(pts.nophen))
+  obs <- rbind(obs.phen,obs.nophen)
+
   # Implement iterative MLHO
 
   data.table::setDT(dbmart)
@@ -104,6 +111,12 @@ mlho_features <- function(PatientObservations,
 
   model.output <- stats::na.omit(model.output)
 
-  return(model.output)
+  obs.output <- obs %>%dplyr::filter(phenx %in% model.output$features)
+  count.output <- dplyr::count(distinct(obs.output, patient_num, phenx, aoi, .keep_all = TRUE), phenx,aoi,n.tot)
+  perc.output <- count.output%>%dplyr::mutate(perc = n/n.tot)
+
+  return(list(
+    model.output = model.output,
+    perc.output = perc.output))
 }
 

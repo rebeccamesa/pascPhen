@@ -18,7 +18,7 @@ runAnalysis_MLHO(data_dir, output_dir = NULL, siteid, long.thres, phenotype)
 \item{phenotype}{phenotype of interest}
 }
 \value{
-NULL.
+phenotyping output and features prevalance
 }
 \description{
 run MLHO analysis
