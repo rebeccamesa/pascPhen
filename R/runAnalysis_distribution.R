@@ -47,10 +47,10 @@ runAnalysis_distribution <- function(data_dir, siteid, long.thres){
     mask_thres <- 0
   }
 
-  distribution.output <- phen_distribution(PatientObservations, PatientSummary, rules,siteid, long.thres)
+  distribution.output <- phen_distribution(PatientObservations, PatientSummary, rules, siteid, long.thres)
   Phen.data.tot <- distribution.output$Phen.data.tot
   tot.count <- distribution.output$tot.count
-  tot.count.blur <- blur_it(tot.count,c("before_adm","dayN14toN1","day0to29","day30to89","day90plus"), blur_abs, mask_thres)
+  tot.count.blur <- blur_it(tot.count,c("before_adm","dayN14toN1","day0to29","day30to59", "day60to89", "day90plus"), blur_abs, mask_thres)
   post.count <- distribution.output$post.count
   post.count.blur <- blur_it(post.count, "n", blur_abs, mask_thres)
   post.prev.blur <- post.count.blur%>%dplyr::mutate(perc = 100*n/n.tot)

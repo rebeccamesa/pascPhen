@@ -21,16 +21,18 @@ phen_distribution <- function(PatientObservations,
   PatientObservations$concept_code <- gsub('[.]', '', PatientObservations$concept_code)
 
   data <- PatientSummary %>%
-    dplyr::select(patient_num, severe, deceased, sex, age_group, race, admission_date) %>%
+    #dplyr::select(patient_num, severe, deceased, sex, age_group, race, admission_date) %>%
+    dplyr::select(patient_num, severe, sex, age_group, admission_date)%>%
     merge(PatientObservations, by = "patient_num")
   data$calendar_date <- as.Date(data$admission_date)+data$days_since_admission
   data <- data %>%
     dplyr::mutate(stage = dplyr::case_when(days_since_admission >= 90 ~ "day90plus",
-                             days_since_admission >= 30 ~ "day30to89",
-                             days_since_admission >= 0 ~ "day0to29",
-                             days_since_admission >=-14 ~ "dayN14toN1",
-                             TRUE ~ "before_adm"))%>%
-    dplyr::mutate(stage = factor(stage, levels = c("before_adm", "dayN14toN1", "day0to29", "day30to89", "day90plus")))
+                                           days_since_admission >= 60 ~ "day60to89",
+                                           days_since_admission >= 30 ~ "day30to59",
+                                           days_since_admission >= 0 ~ "day0to29",
+                                           days_since_admission >=-14 ~ "dayN14toN1",
+                                           TRUE ~ "before_adm"))%>%
+    dplyr::mutate(stage = factor(stage, levels = c("before_adm", "dayN14toN1", "day0to29", "day30to59", "day60to89", "day90plus")))
 
   # Compute occurences
   phenotypes <- unique(rules$PASC_Phenotype)
@@ -68,7 +70,7 @@ phen_distribution <- function(PatientObservations,
   Phen.data.tot <- dplyr::distinct(dOrder, patient_num, phenotype, .keep_all = TRUE)
   tot.count <- as.data.frame.matrix(table(Phen.data.tot$phenotype, Phen.data.tot$stage))
   tot.count$Phenotype<-rownames(tot.count)
-  tot.count<-tot.count[,c(6,1,2,3,4,5)]
+  tot.count<-tot.count[,c(7,1,2,3,4,5,6)]
   rownames(tot.count) <- 1:dim(tot.count)[1]
   dist<-data%>%dplyr::distinct(patient_num,stage)
   tot<-table(dist$stage)

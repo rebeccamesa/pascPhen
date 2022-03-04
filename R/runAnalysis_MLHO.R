@@ -18,7 +18,7 @@ runAnalysis_MLHO <- function(data_dir, siteid, long.thres, phenotype, MSMR.spars
   PatientObservations$concept_code <- gsub('[.]', '', PatientObservations$concept_code)
 
   print(paste0("Phenotyping .....",phenotype, "  (─‿─)  "))
-  phenotyping.output <- mlho_features(PatientObservations, PatientSummary, rules, days.long=long.thres, phenotype=phenotype, MSMR.topn=50, MSMR.sparsity = MSMR.sparsity)
+  phenotyping.output <- mlho_features(PatientObservations, PatientSummary, rules, days.long=long.thres, phenotype=phenotype, MSMR.topn=100, MSMR.sparsity = MSMR.sparsity)
   phenotyping.features <- phenotyping.output$model.output
   phenotyping.features$type <- rep("phenotyping", nrow(phenotyping.features))
   phenotyping.features$site <- rep(siteid, nrow(phenotyping.features))
