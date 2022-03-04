@@ -4,7 +4,13 @@
 \alias{phen_distribution}
 \title{Phenotype distribution}
 \usage{
-phen_distribution(PatientObservations, PatientSummary, rules, siteid)
+phen_distribution(
+  PatientObservations,
+  PatientSummary,
+  rules,
+  siteid,
+  long.thres
+)
 }
 \arguments{
 \item{PatientObservations}{2.1 PatientObservations table}
@@ -14,6 +20,8 @@ phen_distribution(PatientObservations, PatientSummary, rules, siteid)
 \item{rules}{table containing the phenotype definitions}
 
 \item{siteid}{label specifying the site}
+
+\item{long.thres}{"long" stage threshold}
 }
 \value{
 count tables

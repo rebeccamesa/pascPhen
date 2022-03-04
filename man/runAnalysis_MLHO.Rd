@@ -4,18 +4,18 @@
 \alias{runAnalysis_MLHO}
 \title{run MLHO analysis}
 \usage{
-runAnalysis_MLHO(data_dir, output_dir = NULL, siteid, long.thres, phenotype)
+runAnalysis_MLHO(data_dir, siteid, long.thres, phenotype, MSMR.sparsity)
 }
 \arguments{
 \item{data_dir}{directory of the 4CE tables}
-
-\item{output_dir}{directory of the analysis results. If NULL results are saved in the \code{getProjectOutputDirectory()} directory}
 
 \item{siteid}{label specifying the site}
 
 \item{long.thres}{"long" stage threshold}
 
 \item{phenotype}{phenotype of interest}
+
+\item{MSMR.sparsity}{MSMR lite parameter}
 }
 \value{
 phenotyping output and features prevalance

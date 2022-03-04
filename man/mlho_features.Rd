@@ -13,12 +13,12 @@ mlho_features(
   phenotype,
   prediction = FALSE,
   test.sample = 25,
-  MSMR.sparsity = 0.005,
+  MSMR.sparsity,
   MSMR.topn = 200,
   multicore = FALSE,
   iteration = 5,
   score.threshold = 80,
-  classifier
+  classifier = "GLM"
 )
 }
 \arguments{

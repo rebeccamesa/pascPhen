@@ -5,6 +5,7 @@
 #' @param PatientSummary 2.1 PatientSummary table
 #' @param rules table containing the phenotype definitions
 #' @param siteid label specifying the site
+#' @param long.thres "long" stage threshold
 #'
 #' @return count tables
 #' @export
@@ -12,7 +13,8 @@
 phen_distribution <- function(PatientObservations,
                               PatientSummary,
                               rules,
-                              siteid)
+                              siteid,
+                              long.thres)
 {
   # Prepare data
   PatientObservations <- dplyr::select(PatientObservations, -value,-siteid)
@@ -75,19 +77,19 @@ phen_distribution <- function(PatientObservations,
   site <- rep(siteid, nrow(tot.count))
   tot.count <- cbind(tot.count, site)
 
-  post.covid <- data%>%dplyr::filter(stage %in% c("day30to89", "day90plus"))
+  post.covid <- data%>%dplyr::filter(days_since_admission >= long.thres)
   n.post <- length(unique(post.covid$patient_num))
-  post.count <-dplyr::count(dplyr::distinct(Phen.data.tot%>%dplyr::filter(stage %in% c("day30to89", "day90plus")),patient_num,phenotype),phenotype)
-  post.prev <- post.count%>%dplyr::mutate(perc = n/n.post)
-  post.prev <- post.prev[order(post.prev$perc, decreasing = TRUE),]
-  n.tot <- rep(n.post, nrow(post.prev))
-  site <- rep(siteid, nrow(post.prev))
-  post.prev <- cbind(post.prev, n.tot, site)
+  post.count <-dplyr::count(dplyr::distinct(Phen.data.tot%>%dplyr::filter(days_since_admission >= long.thres),patient_num,phenotype),phenotype)
+  # post.prev <- post.count%>%dplyr::mutate(perc = n/n.post)
+  # post.prev <- post.prev[order(post.prev$perc, decreasing = TRUE),]
+  n.tot <- rep(n.post, nrow(post.count))
+  site <- rep(siteid, nrow(post.count))
+  post.count <- cbind(post.count, n.tot, site)
 
   return(list(
     Phen.data.tot = Phen.data.tot,
     tot.count = tot.count,
-    post.prev = post.prev)
+    post.count = post.count)
   )
 
 

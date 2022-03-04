@@ -4,14 +4,14 @@
 \alias{runAnalysis_distribution}
 \title{run distribution analysis}
 \usage{
-runAnalysis_distribution(data_dir, output_dir = NULL, siteid)
+runAnalysis_distribution(data_dir, siteid, long.thres)
 }
 \arguments{
 \item{data_dir}{directory of the 4CE tables}
 
-\item{output_dir}{directory of the analysis results. If NULL results are saved in the \code{getProjectOutputDirectory()} directory}
-
 \item{siteid}{label specifying the site}
+
+\item{long.thres}{"long" stage threshold}
 }
 \value{
 phenotype data and count tables

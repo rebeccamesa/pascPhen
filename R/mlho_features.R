@@ -28,12 +28,12 @@ mlho_features <- function(PatientObservations,
                           phenotype,
                           prediction = FALSE,
                           test.sample=25,
-                          MSMR.sparsity=0.005,
+                          MSMR.sparsity,
                           MSMR.topn=200,
                           multicore=FALSE,
                           iteration=5,
                           score.threshold=80,
-                          classifier)
+                          classifier="GLM")
 {
 
   # Prepare labeldt, dbmart and dems
@@ -44,7 +44,7 @@ mlho_features <- function(PatientObservations,
 
   # Let's binarize age. "other" has to be discussed
   PatientSummary <- dplyr::mutate(PatientSummary, age_group = dplyr::case_when((age_group == "80plus" | age_group == "70to79") ~ "70plus",
-                                                                                     TRUE ~ "00to69"))
+                                                                               TRUE ~ "00to69"))
   labeldt <- createLabels(days.long, rules.phen, PatientObservations)
 
   dems <- PatientSummary %>%
@@ -69,27 +69,36 @@ mlho_features <- function(PatientObservations,
   obs.nophen <- dbmart%>%dplyr::filter(!(patient_num %in% pts.phen))%>%dplyr::mutate(aoi = 0, n.tot = nrow(pts.nophen))
   obs <- rbind(obs.phen,obs.nophen)
 
-  # Implement iterative MLHO
+  print("Implement iterative MLHO for PheWAS")
 
   data.table::setDT(dbmart)
   dbmart[,row :=.I]
   dbmart$value.var <- 1
 
   mlho.features <- mlho::mlho.it(dbmart,
-                           labels = labeldt,
-                           dems,
-                           test.sample = test.sample,
-                           MSMR.sparsity=MSMR.sparsity,
-                           MSMR.topn=MSMR.topn,
-                           mlearn.note="mlho phewas test run",
-                           mlearn.aoi=phenotype,
-                           multicore=multicore,
-                           iterations=iteration)
+                                 labels = labeldt,
+                                 dems,
+                                 test.sample = test.sample,
+                                 MSMR.sparsity=MSMR.sparsity,
+                                 MSMR.topn=MSMR.topn,
+                                 mlearn.note="mlho phewas",
+                                 mlearn.aoi=phenotype,
+                                 multicore=multicore,
+                                 iterations=iteration)
 
-  # Compute MLHO confidence scores (CS)
+
+
+  #
+  require(Rmisc)
+  mlho.auroc.mean <- exp(CI(log(mlho.features$model.i.roc), ci=0.95))[2]
+  mlho.auroc.up95 <- exp(CI(log(mlho.features$model.i.roc), ci=0.95))[1]
+  mlho.auroc.low95 <- exp(CI(log(mlho.features$model.i.roc), ci=0.95))[3]
+
+    # Compute MLHO confidence scores (CS)
 
   mlho.scores <- mlho::mlho.cs(mlho.features)
   mlho.features <- c(as.character(subset(mlho.scores$features,mlho.scores$cs >= score.threshold)))
+
 
   # Implement mlearn with no test set with a training set made of the entire population of MSMR.lite
 
@@ -100,16 +109,20 @@ mlho_features <- function(PatientObservations,
   uniqpats <- c(as.character(unique(dbmart$patient_num)))
 
   model.data <- mlho::MSMSR.lite(MLHO.dat=dbmart,patients = uniqpats,sparsity=NA,jmi = FALSE,labels = labeldt)
+  print("computing the multivariate model")
   model.output <- mlho::mlearn(dat.train=model.data,
-                       dat.test=NULL,
-                       dems=dems,
-                       save.model=FALSE,
-                       classifier=classifier,
-                       note="extracting_coefficients",
-                       aoi=phenotype,
-                       multicore=multicore)
+                               dat.test=NULL,
+                               dems=dems,
+                               save.model=FALSE,
+                               classifier=classifier,
+                               note="extracting_coefficients",
+                               aoi=phenotype,
+                               multicore=multicore)
 
   model.output <- stats::na.omit(model.output)
+  model.output$auroc.mean <- round(as.numeric(mlho.auroc.mean)[1],3)
+  model.output$auroc.CI <- paste0("[ ",round(as.numeric(mlho.auroc.low95)[1],3)," - ",round(as.numeric(mlho.auroc.up95)[1],3)," ]")
+
 
   obs.output <- obs %>%dplyr::filter(phenx %in% model.output$features)
   count.output <- dplyr::count(distinct(obs.output, patient_num, phenx, aoi, .keep_all = TRUE), phenx,aoi,n.tot)
@@ -119,4 +132,3 @@ mlho_features <- function(PatientObservations,
     model.output = model.output,
     perc.output = perc.output))
 }
-
