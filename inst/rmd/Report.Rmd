@@ -45,7 +45,7 @@ ggplot2::ggplot(tot.count.plot,
 From the initial list, you can pursue phenotyping the following PASC phenotypes.
 
 ```{r, echo=FALSE, fig.align='center', fig.width= 10}
-phen.prev <- subset(distribution.output$post.prev, perc >=long.perc)
+phen.prev <- subset(distribution.output$post.prev, perc >=long.perc*100)
 phen.prev <- phen.prev[order(phen.prev$perc, decreasing = TRUE),]
 datatable(phen.prev, options = list(pageLength = 5), filter = 'bottom')
 

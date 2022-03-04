@@ -53,7 +53,7 @@ runAnalysis_distribution <- function(data_dir, siteid, long.thres){
   tot.count.blur <- blur_it(tot.count,c("before_adm","dayN14toN1","day0to29","day30to89","day90plus"), blur_abs, mask_thres)
   post.count <- distribution.output$post.count
   post.count.blur <- blur_it(post.count, "n", blur_abs, mask_thres)
-  post.prev.blur <- post.count.blur%>%dplyr::mutate(perc = n/n.tot)
+  post.prev.blur <- post.count.blur%>%dplyr::mutate(perc = 100*n/n.tot)
   # post.prev <- post.prev[order(post.prev$perc, decreasing = TRUE),]
 
   # Phen.data.tot$siteid <- rep(siteid, nrow(Phen.data.tot))
