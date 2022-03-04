@@ -10,6 +10,7 @@ You can install the package from [Github](https://github.com/rebeccamesa/pascPhe
 ## Analysis
 2 main analysis are implemented:
 * distribution of the phenotypes
-* application of MLHO framework to a specific phenotype
+* application of MLHO framework to the interesting phenotypes
 
-Please run the first analysis with `pascPhen::runAnalysis_distribution(data_dir, output_dir, siteid)`, where *data_dir* is the 4CE data directory, *output_dir* is the customized directory for the results and *siteid* is the label specifying the site. If *output_dir* is null, results are saved in the `getProjectOutputDirectory()`directory. 
+Please run the analysis with `pascPhen::RUN(data_dir, output_dir, siteid, long_thres, long_perc, MSMR.sparsity)`, where *data_dir* is the 4CE data directory, *output_dir* is the customized directory for the output report, *siteid* is the label specifying the site, *long_thres* is the window of interest for PASC, *long_perc* is the minimun percentage according to which a phenotype is selected and *MSMR.sparsity* is the parameter of MSMR lite. 
+If *output_dir* is null, results are saved in the `getProjectOutputDirectory()`directory. 
