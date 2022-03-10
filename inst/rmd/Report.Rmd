@@ -63,7 +63,7 @@ phen.data.plot <- distribution.output$phen.data%>%
     ggplot2::theme_minimal()+
     ggplot2::scale_fill_viridis_c(name = "Days since admission:",option = "G")+
     ggplot2::labs(x = "Days since admission", y = "",
-                  title = paste(PASClist[i]," distribution"),
+                  title = "Phenotype distribution",
                   subtitle = siteid)
 
 mlho_list<- list()
