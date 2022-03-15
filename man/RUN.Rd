@@ -4,7 +4,15 @@
 \alias{RUN}
 \title{RUN PASC analysis}
 \usage{
-RUN(data_dir, output_dir, siteid, long.thres, long.perc, MSMR.sparsity)
+RUN(
+  data_dir,
+  output_dir,
+  siteid,
+  long.thres,
+  long.perc = 0.03,
+  MSMR.sparsity,
+  data_type
+)
 }
 \arguments{
 \item{data_dir}{directory of the 4CE tables}

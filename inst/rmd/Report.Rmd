@@ -13,9 +13,9 @@ library(mlho)
 if(!require(pacman)) install.packages("pacman")
 pacman::p_load(data.table, devtools, backports, Hmisc, tidyr,dplyr,ggplot2,plyr,scales,readr,Rmisc,
                httr, DT, lubridate, tidyverse,reshape2,foreach,doParallel,caret,gbm,lubridate,praznik,
-               ggridges, forcats, stats, FourCePhase2.1Data)
+               ggridges, forcats, stats, FourCePhase2.1Data, ppcor)
 ```
-*This report is generated from  `r siteid` 4Ce data 2.1 on `r Sys.Date()`.* 
+*This report is generated from  `r siteid` 4Ce data `r data_type` on `r Sys.Date()`.* 
 
 ## Exploring the PASC phenotypes
 
@@ -23,7 +23,7 @@ pacman::p_load(data.table, devtools, backports, Hmisc, tidyr,dplyr,ggplot2,plyr,
 The figure below represents the distribution of the phenotypes over the 6 stages
 
 ```{r, echo=FALSE, error=FALSE,fig.align='center', fig.width= 10, warning=FALSE}
-distribution.output <- runAnalysis_distribution (data_dir, siteid, long.thres)
+distribution.output <- runAnalysis_distribution (data_dir, siteid, long.thres, data_type)
 tot.count<-distribution.output$tot.count
 tot.count.long <- pivot_longer(tot.count[-nrow(tot.count),], -c(site, Phenotype), values_to = "Count", names_to = "Stage")
 tot.count.plot <- tot.count.long %>%mutate(Stage = factor(Stage, levels = c("day90plus","day60to89","day30to59","day0to29","dayN14toN1", "before_adm")))
@@ -58,7 +58,7 @@ PASClist <- phen.prev$phenotype
 phen.data.plot <- distribution.output$phen.data%>%
                             dplyr::filter(phenotype %in% PASClist)
 
-  ggplot2::ggplot(phen.data.plot, aes(y = forcats::fct_rev(phenotype), x = as.numeric(days_since_admission), fill = stat(x))) +
+  ggplot2::ggplot(phen.data.plot, aes(y = forcats::fct_rev(phenotype), x = as.numeric(days_since_admission), fill = stat(x)))+
     ggridges::geom_density_ridges_gradient(scale = 2, rel_min_height = 0.01, alpha = 0.8) +
     ggplot2::theme_minimal()+
     ggplot2::scale_fill_viridis_c(name = "Days since admission:",option = "G")+
@@ -67,22 +67,31 @@ phen.data.plot <- distribution.output$phen.data%>%
                   subtitle = siteid)
 
 mlho_list<- list()
+corr_list <- list()
 
 # create for loop to produce the tables of new features and report rocs
 for (i in seq_along(PASClist)) {
   tryCatch({
     print(paste0("running MLHO for ",PASClist[i]))
     # run MLHO on each phenotype
-    mlho_list[[i]] <- runAnalysis_MLHO(data_dir, siteid, long.thres, phenotype = PASClist[i],  MSMR.sparsity)
-    
+    mlho_output <- runAnalysis_MLHO(data_dir, siteid, long.thres, phenotype = PASClist[i],  MSMR.sparsity, data_type)
+    mlho_list[[i]] <- mlho_output$output
+    corr_list[[i]] <- mlho_output$corr
   },
   error = function(fr) {cat("ERROR :",conditionMessage(fr), "\n")})
 }
-datatable( do.call(rbind, lapply(mlho_list, data.frame, stringsAsFactors=FALSE)),
-           options = list(pageLength = 30), filter = 'bottom')
 
+features.table <- do.call(rbind, lapply(mlho_list, data.frame, stringsAsFactors=FALSE))
+write.csv(features.table, 
+          file = file.path(output_dir, paste0("table_",siteid,"_",long.thres,"_",substr(long.perc,3,nchar(long.perc)),"_",gsub("\\.", "",data_type),"_", Sys.Date(),".csv")), row.names = FALSE)
+datatable(features.table, options = list(pageLength = 30), filter = 'bottom')
+
+
+for (i in seq_along(corr_list)) {
+  datatable(corr_list[[i]], options = list(pageLength = 5), filter = 'bottom',
+            caption = paste("Correlation matrix of MLHO features", PASClist[i], sep = "-"))
+}
 ```
-
 
 ## info
 Ask questions pr report issues: `rebecca.mesa01@universitadipavia.it`

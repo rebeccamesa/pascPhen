@@ -2,6 +2,7 @@
 
 export(RUN)
 export(createLabels)
+export(filter_data)
 export(getProjectOutputDirectory)
 export(getPublicSummaryRepositoryUrl)
 export(mlho_features)

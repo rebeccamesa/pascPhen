@@ -5,14 +5,20 @@
 #' @param long.thres "long" stage threshold
 #' @param phenotype phenotype of interest
 #' @param MSMR.sparsity MSMR lite parameter
+#' @param data_type string with the type of 4CE data
 #'
 #' @return phenotyping output and features prevalance
 #' @export
 
-runAnalysis_MLHO <- function(data_dir, siteid, long.thres, phenotype, MSMR.sparsity){
+runAnalysis_MLHO <- function(data_dir, siteid, long.thres, phenotype, MSMR.sparsity, data_type){
 
   PatientObservations <- utils::read.csv(file.path(data_dir, "LocalPatientObservations.csv"))
   PatientSummary <- utils::read.csv(file.path(data_dir, "LocalPatientSummary.csv"))
+  if (data_type != "2.1") {
+    data <- filter_data(PatientObservations, PatientSummary, data_type)
+    PatientObservations <- data$PatientObservations
+    PatientSummary <- data$PatientSummary
+  }
   utils::data("rules")
 
   PatientObservations$concept_code <- gsub('[.]', '', PatientObservations$concept_code)
@@ -23,6 +29,8 @@ runAnalysis_MLHO <- function(data_dir, siteid, long.thres, phenotype, MSMR.spars
   phenotyping.features$type <- rep("phenotyping", nrow(phenotyping.features))
   phenotyping.features$site <- rep(siteid, nrow(phenotyping.features))
   phenotyping.features <- as.data.frame(phenotyping.features)
+
+  corr.matrix <- phenotyping.output$mlho.corr
   # print(phenotyping.output)
 
   # blur_it <- function(df, vars, blur_abs, mask_thres){
@@ -64,7 +72,9 @@ runAnalysis_MLHO <- function(data_dir, siteid, long.thres, phenotype, MSMR.spars
   #   output_dir <- getProjectOutputDirectory()
   # }
 
-  return(output = phenotyping.features)
+  return(list(
+    output = phenotyping.features,
+    corr = corr.matrix))
 
   # save(phenotyping.output,file = paste(paste(output_dir,"/",sep=""),paste(siteid,"results_MLHOphen.RData",sep="_"),sep=""))
 }

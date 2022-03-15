@@ -3,14 +3,20 @@
 #' @param data_dir directory of the 4CE tables
 #' @param siteid label specifying the site
 #' @param long.thres "long" stage threshold
+#' @param data_type string with the type of 4CE data
 #'
 #' @return phenotype data and count tables
 #' @export
 
-runAnalysis_distribution <- function(data_dir, siteid, long.thres){
+runAnalysis_distribution <- function(data_dir, siteid, long.thres, data_type){
 
   PatientObservations <- utils::read.csv(file.path(data_dir, "LocalPatientObservations.csv"))
   PatientSummary <- utils::read.csv(file.path(data_dir, "LocalPatientSummary.csv"))
+  if (data_type != "2.1") {
+    data <- filter_data(PatientObservations, PatientSummary, data_type)
+    PatientObservations <- data$PatientObservations
+    PatientSummary <- data$PatientSummary
+  }
   utils::data("rules")
 
   blur_it <- function(df, vars, blur_abs, mask_thres){

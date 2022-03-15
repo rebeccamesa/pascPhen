@@ -4,7 +4,7 @@
 \alias{runAnalysis_distribution}
 \title{run distribution analysis}
 \usage{
-runAnalysis_distribution(data_dir, siteid, long.thres)
+runAnalysis_distribution(data_dir, siteid, long.thres, data_type)
 }
 \arguments{
 \item{data_dir}{directory of the 4CE tables}
@@ -12,6 +12,8 @@ runAnalysis_distribution(data_dir, siteid, long.thres)
 \item{siteid}{label specifying the site}
 
 \item{long.thres}{"long" stage threshold}
+
+\item{data_type}{string with the type of 4CE data}
 }
 \value{
 phenotype data and count tables

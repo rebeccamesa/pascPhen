@@ -4,7 +4,14 @@
 \alias{runAnalysis_MLHO}
 \title{run MLHO analysis}
 \usage{
-runAnalysis_MLHO(data_dir, siteid, long.thres, phenotype, MSMR.sparsity)
+runAnalysis_MLHO(
+  data_dir,
+  siteid,
+  long.thres,
+  phenotype,
+  MSMR.sparsity,
+  data_type
+)
 }
 \arguments{
 \item{data_dir}{directory of the 4CE tables}
@@ -16,6 +23,8 @@ runAnalysis_MLHO(data_dir, siteid, long.thres, phenotype, MSMR.sparsity)
 \item{phenotype}{phenotype of interest}
 
 \item{MSMR.sparsity}{MSMR lite parameter}
+
+\item{data_type}{string with the type of 4CE data}
 }
 \value{
 phenotyping output and features prevalance

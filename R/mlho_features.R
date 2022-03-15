@@ -17,7 +17,7 @@
 #' @param score.threshold MLHO score threshold
 #' @param classifier mlearn parameter. Classification algorithm
 #'
-#' @return MLHO features and their prevalence
+#' @return output features and their prevalence + MLHO features' correlation
 #' @export
 
 mlho_features <- function(PatientObservations,
@@ -51,14 +51,25 @@ mlho_features <- function(PatientObservations,
     dplyr::select(patient_num, sex, age_group)%>%
     dplyr::mutate(age_group = as.factor(age_group), sex = as.factor(sex))
 
+  # PatientObservations.excl <- PatientObservations %>%
+  #   dplyr::filter(!(paste(gsub(".*-", "", PatientObservations$concept_type), PatientObservations$concept_code) %in% paste(rules.phen$Coding, rules.phen$Code)))%>% # let's exclude codes used to define the phenotype
+  #   dplyr::mutate(phenx = paste(concept_type,concept_code, sep = "_"))
   PatientObservations.excl <- PatientObservations %>%
     dplyr::filter(!(paste(gsub(".*-", "", PatientObservations$concept_type), PatientObservations$concept_code) %in% paste(rules.phen$Coding, rules.phen$Code)))%>% # let's exclude codes used to define the phenotype
-    dplyr::mutate(phenx = paste(concept_type,concept_code, sep = "_"))
+    dplyr::mutate(stage = dplyr::case_when(days_since_admission >= 90 ~ "day90plus",
+                                           days_since_admission >= 60 ~ "day60to89",
+                                           days_since_admission >= 30 ~ "day30to59",
+                                           days_since_admission >= 0 ~ "day0to29",
+                                           days_since_admission >=-14 ~ "dayN14toN1",
+                                           TRUE ~ "before_adm"))%>%
+    dplyr::mutate(phenx = paste0(concept_type,"_",concept_code,"_",stage))
+
 
   if (prediction) {
     dbmart <- dplyr::filter(PatientObservations.excl, days_since_admission < days.pre) #prediction
   } else {
-    dbmart <- dplyr::filter(PatientObservations.excl, days_since_admission > days.long) #phenotyping
+    #dbmart <- dplyr::filter(PatientObservations.excl, days_since_admission > days.long) #phenotyping
+    dbmart <- dplyr::filter(PatientObservations.excl, days_since_admission >=days.pre)
   }
   dbmart <- dplyr::mutate(dbmart[,c('patient_num', 'phenx')], DESCRIPTION = phenx)
 
@@ -109,6 +120,8 @@ mlho_features <- function(PatientObservations,
   uniqpats <- c(as.character(unique(dbmart$patient_num)))
 
   model.data <- mlho::MSMSR.lite(MLHO.dat=dbmart,patients = uniqpats,sparsity=NA,jmi = FALSE,labels = labeldt)
+  corr <- pcor(model.data[,2:(ncol(model.data)-1)], method = "pearson")
+  corr.matrix <- corr$estimate
   print("computing the multivariate model")
   model.output <- mlho::mlearn(dat.train=model.data,
                                dat.test=NULL,
@@ -129,6 +142,7 @@ mlho_features <- function(PatientObservations,
   perc.output <- count.output%>%dplyr::mutate(perc = n/n.tot)
 
   return(list(
+    mlho.corr = corr.matrix,
     model.output = model.output,
     perc.output = perc.output))
 }

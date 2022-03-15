@@ -11,7 +11,7 @@ if(!require(pacman)) install.packages("pacman")
 
 pacman::p_load(data.table, devtools, backports, Hmisc, tidyr,dplyr,ggplot2,plyr,scales,readr,Rmisc,
                httr, DT, lubridate, tidyverse,reshape2,foreach,doParallel,caret,gbm,lubridate,praznik,
-               ggridges, forcats, stats, FourCePhase2.1Data)
+               ggridges, forcats, stats, FourCePhase2.1Data, ppcor)
 
 
 #
@@ -19,8 +19,9 @@ pascPhen::RUN(data_dir = "...", ##set data directory
     output_dir= ".../Output", #create an output directory where you want the html files saved
     siteid = "",
     long.thres = 60, #60 to begin
-    long.perc = 0.05, #*100
-    MSMR.sparsity = 0.005)#*100
+    long.perc = 0.03, #*100 (default)
+    MSMR.sparsity = 0.005, #*100
+    data_type = "")# 2.1, 2.2, 2.2.all
 
 
 

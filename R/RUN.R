@@ -21,7 +21,7 @@
 # MSMR.sparsity = 0.005
 # long.perc <- 0.04
 
-RUN <- function(data_dir, output_dir, siteid, long.thres, long.perc, MSMR.sparsity){
+RUN <- function(data_dir, output_dir, siteid, long.thres, long.perc = 0.03, MSMR.sparsity, data_type){
   data_dir <- data_dir
   output_dir <- output_dir
   if (is.null(output_dir)) {
@@ -30,8 +30,11 @@ RUN <- function(data_dir, output_dir, siteid, long.thres, long.perc, MSMR.sparsi
   long.thres <- long.thres
   long.perc <- long.perc
   MSMR.sparsity <- MSMR.sparsity
+  data_type <- data_type
 
   #rmarkdown::render(paste0(output_dir,"/Report.Rmd"),output_file = paste0("report.",siteid,".", Sys.Date(),".html"))
-  rmarkdown::render(system.file("rmd", "Report.Rmd", package = "pascPhen"), output_file = paste0("report.",siteid,".", Sys.Date(),".html"), output_dir = output_dir)
+  rmarkdown::render(system.file("rmd", "Report.Rmd", package = "pascPhen"),
+                    output_file = paste0("report_",siteid,"_",long.thres,"_",substr(long.perc,3,nchar(long.perc)),"_",gsub("\\.", "",data_type),"_", Sys.Date(),".html"),
+                    output_dir = output_dir)
 }
 

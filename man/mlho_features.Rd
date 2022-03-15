@@ -51,7 +51,7 @@ mlho_features(
 \item{classifier}{mlearn parameter. Classification algorithm}
 }
 \value{
-MLHO features and their prevalence
+output features and their prevalence + MLHO features' correlation
 }
 \description{
 Apply MLHO to extract features
