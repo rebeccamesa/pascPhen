@@ -84,15 +84,37 @@ for (i in seq_along(PASClist)) {
 features.table <- do.call(rbind, lapply(mlho_list, data.frame, stringsAsFactors=FALSE))
 write.csv(features.table, 
           file = file.path(output_dir, paste0("table_",siteid,"_",long.thres,"_",substr(long.perc,3,nchar(long.perc)),"_",gsub("\\.", "",data_type),"_", Sys.Date(),".csv")), row.names = FALSE)
+features.table$OR <- round(features.table$OR,3)
+features.table$low <- round(features.table$low,3)
+features.table$high <- round(features.table$high,3)
 datatable(features.table, options = list(pageLength = 30), filter = 'bottom')
 
 
-for (i in seq_along(corr_list)) {
-  datatable(corr_list[[i]], options = list(pageLength = 5), filter = 'bottom',
-            caption = paste("Correlation matrix of MLHO features", PASClist[i], sep = "-"))
+# for (i in seq_along(corr_list)) {
+#   datatable(corr_list[[i]], options = list(pageLength = 5), filter = 'bottom',
+#             caption = paste("Correlation matrix of MLHO features", PASClist[i], sep = "-"))
+# }
+```
+```{r}
+cor.tab <- list()
+for (j in seq_along(corr_list)) {
+  dat.i<- data.frame(corr_list[j])
+  dat.i$features <- rownames(dat.i)
+  rownames(dat.i) <- NULL
+  
+library(reshape2)
+dat.i.wide <- dat.i %>%
+  melt(id.var="features") %>%
+  arrange(features, variable)
+colnames(dat.i.wide) <- c("var1","var2","correlation")
+dat.i.wide$correlation <- round(dat.i.wide$correlation,3)
+cor.tab[[j]] <- dat.i.wide
 }
+cor.tab <- do.call(rbind, lapply(cor.tab, data.frame, stringsAsFactors=FALSE))
+datatable(cor.tab, options = list(pageLength = 5), filter = 'bottom')
+
 ```
 
 ## info
-Ask questions pr report issues: `rebecca.mesa01@universitadipavia.it`
+Ask questions or report issues: `rebecca.mesa01@universitadipavia.it`
 
