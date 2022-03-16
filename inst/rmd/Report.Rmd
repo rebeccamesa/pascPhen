@@ -84,9 +84,9 @@ for (i in seq_along(PASClist)) {
 features.table <- do.call(rbind, lapply(mlho_list, data.frame, stringsAsFactors=FALSE))
 write.csv(features.table, 
           file = file.path(output_dir, paste0("table_",siteid,"_",long.thres,"_",substr(long.perc,3,nchar(long.perc)),"_",gsub("\\.", "",data_type),"_", Sys.Date(),".csv")), row.names = FALSE)
-features.table$OR <- round(features.table$OR,3)
-features.table$low <- round(features.table$low,3)
-features.table$high <- round(features.table$high,3)
+# features.table$OR <- round(features.table$OR,3)
+# features.table$low <- round(features.table$low,3)
+# features.table$high <- round(features.table$high,3)
 datatable(features.table, options = list(pageLength = 30), filter = 'bottom')
 
 
