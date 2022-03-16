@@ -95,7 +95,9 @@ datatable(features.table, options = list(pageLength = 30), filter = 'bottom')
 #             caption = paste("Correlation matrix of MLHO features", PASClist[i], sep = "-"))
 # }
 ```
-```{r}
+
+correlation matrix among the identified features.
+```{r, echo=FALSE, fig.align='center', fig.width= 10}
 cor.tab <- list()
 for (j in seq_along(corr_list)) {
   dat.i<- data.frame(corr_list[j])
