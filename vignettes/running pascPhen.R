@@ -11,7 +11,7 @@ if(!require(pacman)) install.packages("pacman")
 
 pacman::p_load(data.table, devtools, backports, Hmisc, tidyr,dplyr,ggplot2,plyr,scales,readr,Rmisc,
                httr, DT, lubridate, tidyverse,reshape2,foreach,doParallel,caret,gbm,lubridate,praznik,
-               ggridges, forcats, stats, FourCePhase2.1Data, ppcor)
+               ggridges, forcats, stats, FourCePhase2.1Data, ppcor,pascPhen)
 
 
 #
