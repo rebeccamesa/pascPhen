@@ -34,6 +34,7 @@ for (i in 1:length(names)) {
     colnames(dat.i.wide) <- c("var1","var2","correlation")
     dat.i.wide$correlation <- round(dat.i.wide$correlation,3)
     corr_list[[i]] <- dat.i.wide
+    rm(features,corrs)
   }, 
   error = function(fr) {cat("ERROR :",conditionMessage(fr), "\n")})
 }
