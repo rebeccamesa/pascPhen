@@ -1,16 +1,47 @@
 # pascPhen Package
-pascPhen is a package for the analysis of Post-Acute Sequelae of SARS-CoV-2 infection (PASC) rule-based phenotypes.
-It provides functions for the description of the phenotype distribution and the application of MLHO framework with the aim of extracting features that can contribute to the re-definition of the phenotype.
+pascPhen is a package for the analysis of Post-Acute Sequelae of SARS-CoV-2 infection (PASC) rule-based phenotypes.  
+The main steps of the analysis are:
+* Plot of the phenotypes distribution over different stages 
+* Selection of the phenotypes with a high prevalence in the PASC window 
+* Application of the MLHO for PheWAS framework to the selected phenotypes to find new features that can be included in the definition of the phenotypes  
 
-## Installation
-You can install the package from [Github](https://github.com/rebeccamesa/pascPhen) with:
+The package will create automatically a html report with the results of all these steps.
 
-`devtools::install_github("rebeccamesa/pascPhen")`
+## Run the analysis
+To run the package:
 
-## Analysis
-2 main analysis are implemented:
-* distribution of the phenotypes
-* application of MLHO framework to the interesting phenotypes
+```
+if(!require(devtools)) devtools::install_github("hadley/devtools")
+if(!require(mlho)) devtools::install_github("hestiri/mlho")
+if(!require(pascPhen)) devtools::install_github("rebeccamesa/pascPhen")
+if(!require(pacman)) install.packages("pacman")
 
-Please run the analysis with `pascPhen::RUN(data_dir, output_dir, siteid, long_thres, long_perc, MSMR.sparsity)`, where *data_dir* is the 4CE data directory, *output_dir* is the customized directory for the output report, *siteid* is the label specifying the site, *long_thres* is the window of interest for PASC, *long_perc* is the minimun percentage according to which a phenotype is selected and *MSMR.sparsity* is the parameter of MSMR lite. 
-If *output_dir* is null, results are saved in the `getProjectOutputDirectory()`directory. 
+pacman::p_load(data.table, devtools, backports, Hmisc, tidyr,dplyr,ggplot2,plyr,scales,readr,Rmisc,
+               httr, DT, lubridate, tidyverse,reshape2,foreach,doParallel,caret,gbm,lubridate,praznik,
+               ggridges, forcats, stats, FourCePhase2.1Data, ppcor,pascPhen, reshape2)
+
+pascPhen::RUN_lite(data_dir = "...", # set data directory
+    output_dir= ".../Output", # create an output directory where you want the html files saved
+    siteid = "",
+    long.thres = 60, #60 and 90
+    long.perc = 0.03, #*100 (default)
+    MSMR.sparsity = 0.005, #*100
+    data_type = "")# 2.1, 2.2
+```
+
+### RUN_lite parameters
+
+|**Parameter**|**Description**|
+|:------------|:--------------|
+|data_dir     |path to your 2.1 or 2.2 data|
+|output_dir   |path to the output directory where you want the html reports saved|
+|siteid       |your site id. **Important for 4CE obfuscation**
+|long.thres   |PASC window. We will do 60 and 90 days|
+|long.perc    |phenotype selection percentage. Default is 3%|
+|MSMR.sparsity|parameter of MSMR. Set to 0.005|
+|data_type    |2.1 or 2.2|
+
+
+Please send your output reports via slack.
+
+
