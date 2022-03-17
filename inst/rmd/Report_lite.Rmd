@@ -20,7 +20,7 @@ names <- list.files(tmp.dir)
 names <- names[names %like% paste0("phen")]
 mlho_list<- list()
 corr_list <- list()
-for (n in 1:length(names)) {
+for (i in 1:length(names)) {
   tryCatch({
     load(paste0(tmp.dir,"/",names[i]))
     mlho_list[[i]] <- features
