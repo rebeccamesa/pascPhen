@@ -8,12 +8,44 @@ output:
 
 
 ```{r, echo=FALSE, include=FALSE}
-library(pascPhen)
-library(mlho)
 if(!require(pacman)) install.packages("pacman")
 pacman::p_load(data.table, devtools, backports, Hmisc, tidyr,dplyr,ggplot2,plyr,scales,readr,Rmisc,
                httr, DT, lubridate, tidyverse,reshape2,foreach,doParallel,caret,gbm,lubridate,praznik,
-               ggridges, forcats, stats, FourCePhase2.1Data, ppcor,pascPhen, reshape2)
+               ggridges, forcats, stats,ppcor, reshape2)
+
+load(paste0(tmp.dir,"/distributions.RData"))
+
+
+names <- list.files(tmp.dir)
+names <- names[names %like% paste0("phen")]
+mlho_list<- list()
+corr_list <- list()
+for (n in 1:length(names)) {
+  tryCatch({
+    load(paste0(tmp.dir,"/",names[i]))
+    mlho_list[[i]] <- features
+    dat.i <- data.frame(corrs)
+    dat.i$features <- rownames(dat.i)
+    rownames(dat.i) <- NULL
+    library(reshape2)
+    dat.i.wide <- dat.i %>%
+  melt(id.var="features") %>%
+  arrange(features, variable)
+    colnames(dat.i.wide) <- c("var1","var2","correlation")
+    dat.i.wide$correlation <- round(dat.i.wide$correlation,3)
+    corr_list[[i]] <- dat.i.wide
+  }, 
+  error = function(fr) {cat("ERROR :",conditionMessage(fr), "\n")})
+}
+
+features.table <- do.call(rbind, lapply(mlho_list, data.frame, stringsAsFactors=FALSE))
+mlho_list$X <- NULL
+
+write.csv(features.table, 
+          file = file.path(output_dir, paste0("table_",siteid,"_",long.thres,"_",substr(long.perc,3,nchar(long.perc)),"_",gsub("\\.", "",data_type),"_", Sys.Date(),".csv")), row.names = FALSE)
+
+cor.tab <- do.call(rbind, lapply(corr_list, data.frame, stringsAsFactors=FALSE))
+cor.tab$X <- NULL
 ```
 **This report is generated from  `r siteid` 4Ce data `r data_type` on `r Sys.Date()`.** 
 
@@ -23,7 +55,6 @@ pacman::p_load(data.table, devtools, backports, Hmisc, tidyr,dplyr,ggplot2,plyr,
 The figure below represents the distribution of the phenotypes over the 6 stages
 
 ```{r, echo=FALSE, error=FALSE,fig.align='center', fig.width= 10, warning=FALSE}
-load(tmp.file)
 pl1
 ```
 
@@ -33,7 +64,6 @@ From the initial list, you can pursue phenotyping the following PASC phenotypes.
 
 ```{r, echo=FALSE, fig.align='center', fig.width= 10}
 datatable(phen.prev, options = list(pageLength = 5), filter = 'bottom')
-
 ```
 The table presents the `r nrow(phen.prev)` phenotypes for which we have x positives, where x>=`r long.perc` of the total patients with available data from `r long.thres` days or longer after hospitalization/infection
 
@@ -46,7 +76,6 @@ datatable(features.table, options = list(pageLength = 30), filter = 'bottom')
 correlation matrix among the identified features.
 ```{r, echo=FALSE, fig.align='center', fig.width= 10}
 datatable(cor.tab, options = list(pageLength = 5), filter = 'bottom')
-
 ```
 
 ## info

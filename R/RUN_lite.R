@@ -27,6 +27,13 @@ RUN_lite <- function(data_dir, output_dir, siteid, long.thres, long.perc = 0.03,
     output_dir <- getProjectOutputDirectory()
   }
 
+  tmp.dir<-paste0(output_dir,"/",stringi::stri_rand_strings(1, 8))
+  if (dir.exists(tmp.dir)) {
+    unlink(tmp.dir, recursive = TRUE)
+  }
+  dir.create(tmp.dir)
+  # tmp.file <- paste0(tmp.dir,"/MLHOAnalysis.RData")
+
   distribution.output <- runAnalysis_distribution (data_dir, siteid, long.thres, data_type)
   tot.count<-distribution.output$tot.count
   tot.count.long <- pivot_longer(tot.count[-nrow(tot.count),], -c(site, Phenotype), values_to = "Count", names_to = "Stage")
@@ -41,6 +48,9 @@ RUN_lite <- function(data_dir, output_dir, siteid, long.thres, long.perc = 0.03,
     ggplot2::labs(y = "Counts", x = "",
                   title = "Phenotype counts",
                   subtitle = siteid)
+
+
+
   phen.prev <- subset(distribution.output$post.prev, perc >=long.perc*100)
   phen.prev <- phen.prev[order(phen.prev$perc, decreasing = TRUE),]
 
@@ -55,9 +65,9 @@ RUN_lite <- function(data_dir, output_dir, siteid, long.thres, long.perc = 0.03,
     ggplot2::labs(x = "Days since admission", y = "",
                   title = "Phenotype distribution",
                   subtitle = siteid)
-
-  mlho_list<- list()
-  corr_list <- list()
+  save(pl1,phen.prev,pl2,PASClist,file = paste0(tmp.dir,"/distributions.RData"))
+rm(pl1,phen.prev,pl2,distribution.output,tot.count,phen.data.plot,
+   tot.count,tot.count.long,tot.count.plot,site.country.obfuscation);gc()
 
   # create for loop to produce the tables of new features and report rocs
   for (i in seq_along(PASClist)) {
@@ -65,40 +75,38 @@ RUN_lite <- function(data_dir, output_dir, siteid, long.thres, long.perc = 0.03,
       print(paste0("running MLHO for ",PASClist[i]))
       # run MLHO on each phenotype
       mlho_output <- runAnalysis_MLHO(data_dir, siteid, long.thres, phenotype = PASClist[i],  MSMR.sparsity, data_type)
-      mlho_list[[i]] <- mlho_output$output
-      corr_list[[i]] <- mlho_output$corr
+      features <- mlho_output$output
+      corrs <- mlho_output$corr
+      save(features,corrs,file = paste0(tmp.dir,"/phen",i,".RData"))
+      rm(mlho_output,features,corrs);gc()
+
     },
     error = function(fr) {cat("ERROR :",conditionMessage(fr), "\n")})
   }
 
-  features.table <- do.call(rbind, lapply(mlho_list, data.frame, stringsAsFactors=FALSE))
-  write.csv(features.table,
-            file = file.path(output_dir, paste0("table_",siteid,"_",long.thres,"_",substr(long.perc,3,nchar(long.perc)),"_",gsub("\\.", "",data_type),"_", Sys.Date(),".csv")), row.names = FALSE)
+  # features.table <- do.call(rbind, lapply(mlho_list, data.frame, stringsAsFactors=FALSE))
+  # write.csv(features.table,
+            # file = file.path(output_dir, paste0("table_",siteid,"_",long.thres,"_",substr(long.perc,3,nchar(long.perc)),"_",gsub("\\.", "",data_type),"_", Sys.Date(),".csv")), row.names = FALSE)
   # features.table$OR <- round(features.table$OR,3)
   # features.table$low <- round(features.table$low,3)
   # features.table$high <- round(features.table$high,3)
-  cor.tab <- list()
-  for (j in seq_along(corr_list)) {
-    dat.i<- data.frame(corr_list[j])
-    dat.i$features <- rownames(dat.i)
-    rownames(dat.i) <- NULL
+  # cor.tab <- list()
+  # for (j in seq_along(corr_list)) {
+  #   dat.i<- data.frame(corr_list[j])
+  #   dat.i$features <- rownames(dat.i)
+  #   rownames(dat.i) <- NULL
+  #
+  #   dat.i.wide <- dat.i %>%
+  #     reshape2::melt(id.var="features") %>%
+  #     dplyr::arrange(features, variable)
+  #   colnames(dat.i.wide) <- c("var1","var2","correlation")
+  #   dat.i.wide$correlation <- round(dat.i.wide$correlation,3)
+  #   cor.tab[[j]] <- dat.i.wide
+  # }
+  # cor.tab <- do.call(rbind, lapply(cor.tab, data.frame, stringsAsFactors=FALSE))
 
-    dat.i.wide <- dat.i %>%
-      reshape2::melt(id.var="features") %>%
-      dplyr::arrange(features, variable)
-    colnames(dat.i.wide) <- c("var1","var2","correlation")
-    dat.i.wide$correlation <- round(dat.i.wide$correlation,3)
-    cor.tab[[j]] <- dat.i.wide
-  }
-  cor.tab <- do.call(rbind, lapply(cor.tab, data.frame, stringsAsFactors=FALSE))
 
-  tmp.dir<-paste0(output_dir,"/tmp")
-  if (dir.exists(tmp.dir)) {
-    unlink(tmp.dir, recursive = TRUE)
-  }
-  dir.create(tmp.dir)
-  tmp.file <- paste0(tmp.dir,"/MLHOAnalysis.RData")
-  save(pl1,phen.prev,pl2,features.table,cor.tab,file = tmp.file)
+  # save(pl1,phen.prev,pl2,features.table,cor.tab,file = tmp.file)
 
   #rmarkdown::render(paste0(output_dir,"/Report.Rmd"),output_file = paste0("report.",siteid,".", Sys.Date(),".html"))
   rmarkdown::render(system.file("rmd", "Report_lite.Rmd", package = "pascPhen"),
