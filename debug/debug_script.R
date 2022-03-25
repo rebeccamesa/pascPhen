@@ -54,7 +54,7 @@ if (data_type != "2.1") {
   pts <- unique(PatientSummary$patient_num)
   PatientObservations <- PatientObservations%>%dplyr::filter(patient_num %in% pts)
 }
-utils::data("rules")
+utils::data("rules", package = "pascPhen")
 
 
 blur_it <- function(df, vars, blur_abs, mask_thres){
@@ -194,7 +194,7 @@ for (i in seq_along(PASClist)) {
       pts <- unique(PatientSummary$patient_num)
       PatientObservations <- PatientObservations%>%dplyr::filter(patient_num %in% pts)
     }
-    utils::data("rules")
+    utils::data("rules", package = "pascPhen")
 
     PatientObservations$concept_code <- gsub('[.]', '', PatientObservations$concept_code)
     days.long <- long.thres
