@@ -1,11 +1,11 @@
-# Set parameters
-data_dir <- ""
-output_dir <- ""
-siteid <- ""
-long.thres <- 60 #60,90
-long.perc <- 0.03
-MSMR.sparsity <- 0.005
-data_type <- "" #2.1, 2.2, 2.2.all
+# # Set parameters
+# data_dir <- ""
+# output_dir <- ""
+# siteid <- ""
+# long.thres <- 60 #60,90
+# long.perc <- 0.03
+# MSMR.sparsity <- 0.005
+# data_type <- "" #2.1, 2.2, 2.2.all
 
 # Load packages
 if(!require(devtools)) devtools::install_github("hadley/devtools")
@@ -18,7 +18,18 @@ pacman::p_load(data.table, devtools, backports, Hmisc, tidyr,dplyr,ggplot2,plyr,
                ggridges, forcats, stats, FourCePhase2.1Data, ppcor,pascPhen, reshape2)
 
 if (is.null(output_dir)) {
-  output_dir <- getProjectOutputDirectory()
+  dataRepositoryUrl = "https://github.com/covidclinical/pascPhenSummariesPublic.git"
+  repositoryName = gsub(x = gsub(x = dataRepositoryUrl, pattern = "https://github.com/covidclinical/",
+                                 fixed = TRUE, replace = ""), pattern = ".git", fixed = TRUE,
+                        replace = "")
+  projectName = gsub(x = repositoryName, pattern = "SummariesPublic",
+                     replace = "", fixed = TRUE)
+  dirName = file.path(FourCePhase2.1Data::getContainerScratchDirectory(),
+                      projectName)
+  if (!dir.exists(dirName)) {
+    dir.create(dirName)
+  }
+  output_dir <- dirName
 }
 
 tmp.dir<-paste0(output_dir,"/",stringi::stri_rand_strings(1, 8))
@@ -33,11 +44,18 @@ dir.create(tmp.dir)
 PatientObservations <- utils::read.csv(file.path(data_dir, "LocalPatientObservations.csv"))
 PatientSummary <- utils::read.csv(file.path(data_dir, "LocalPatientSummary.csv"))
 if (data_type != "2.1") {
-  data <- filter_data(PatientObservations, PatientSummary, data_type)
-  PatientObservations <- data$PatientObservations
-  PatientSummary <- data$PatientSummary
+  if (data_type == "2.2") {
+    PatientSummary <- PatientSummary%>%dplyr::filter(cohort %like% "PosAdm")
+  } else{
+    if (data_type == "2.2.all") {
+      PatientSummary<-PatientSummary%>%dplyr::filter(cohort %like% "PosAdm" | cohort %like% "PosNotAdm")
+    }
+  }
+  pts <- unique(PatientSummary$patient_num)
+  PatientObservations <- PatientObservations%>%dplyr::filter(patient_num %in% pts)
 }
 utils::data("rules")
+
 
 blur_it <- function(df, vars, blur_abs, mask_thres){
   # Obfuscate count values.
@@ -166,9 +184,15 @@ for (i in seq_along(PASClist)) {
     PatientObservations <- utils::read.csv(file.path(data_dir, "LocalPatientObservations.csv"))
     PatientSummary <- utils::read.csv(file.path(data_dir, "LocalPatientSummary.csv"))
     if (data_type != "2.1") {
-      data <- filter_data(PatientObservations, PatientSummary, data_type)
-      PatientObservations <- data$PatientObservations
-      PatientSummary <- data$PatientSummary
+      if (data_type == "2.2") {
+        PatientSummary <- PatientSummary%>%dplyr::filter(cohort %like% "PosAdm")
+      } else{
+        if (data_type == "2.2.all") {
+          PatientSummary<-PatientSummary%>%dplyr::filter(cohort %like% "PosAdm" | cohort %like% "PosNotAdm")
+        }
+      }
+      pts <- unique(PatientSummary$patient_num)
+      PatientObservations <- PatientObservations%>%dplyr::filter(patient_num %in% pts)
     }
     utils::data("rules")
 
@@ -192,7 +216,19 @@ for (i in seq_along(PASClist)) {
     # Let's binarize age. "other" has to be discussed
     PatientSummary <- dplyr::mutate(PatientSummary, age_group = dplyr::case_when((age_group == "80plus" | age_group == "70to79") ~ "70plus",
                                                                                  TRUE ~ "00to69"))
-    labeldt <- createLabels(days.long, rules.phen, PatientObservations)
+    # Create labels
+    rulesPhen <- rules.phen
+    dOrder <- PatientObservations[order(PatientObservations$patient_num, PatientObservations$days_since_admission),]
+    PatientObservations <- dplyr::distinct(dOrder, patient_num, concept_code, value, .keep_all = TRUE)
+    PatientObservations$label <- 0
+
+    PatientObservations$label[PatientObservations$days_since_admission>days.long & paste(gsub(".*-", "", PatientObservations$concept_type), PatientObservations$concept_code) %in% paste(rulesPhen$Coding, rulesPhen$Code)] <- 1
+    labeldt <- PatientObservations%>%
+      dplyr::select(patient_num,label)%>%
+      dplyr::group_by(patient_num)%>%
+      dplyr::summarize_all(max)%>%
+      dplyr::mutate(label = as.factor(label))
+
 
     dems <- PatientSummary %>%
       dplyr::select(patient_num, sex, age_group)%>%
