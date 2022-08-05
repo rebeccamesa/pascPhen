@@ -1,4 +1,4 @@
-#' pascbuckets
+#' analyzing buckets of MLHO and core features
 #'
 #' @param data_dir directory of the 4CE tables
 #' @param output_dir directory for saving the results
