@@ -156,7 +156,7 @@ pascbuckets <- function(data_dir,
       el3$bucket <- ifelse(el3$patient_num %in% bucket2, 2,el3$bucket )
       table(el3$bucket)
 
-
+if (chart_review=TRUE) {
       bucket1.sample <- subset(data$patient_num,!(data$patient_num %in% el3$patient_num))
 
       bucket4 <- data.frame(sample (bucket4, size=35, replace =F))
@@ -178,7 +178,7 @@ pascbuckets <- function(data_dir,
 
       bucketlist[[h]] <- buckets #PHI needed for chart review
       # feat.viz[[h]] <- dat.viz
-
+}
 
       el3$PASC_Phenotype <- pascphens[h]
       el3$site <- siteid
